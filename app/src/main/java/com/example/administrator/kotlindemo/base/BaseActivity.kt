@@ -29,7 +29,7 @@ abstract class BaseActivity<P : BasePresenter<*, *>, M : BaseModel?> : AppCompat
         this.setContentView(this.getLayoutId())
         mPresenter = TUtil.getT<P>(this, 0)
         mModel = TUtil.getT<M>(this, 1)
-        if (this is BaseView) mPresenter!!.attachVM(this, mModel)
+        if (this is BaseView) mPresenter?.attachVM(this, mModel)
         initTitle()
         initView(savedInstanceState)
         initEvent()

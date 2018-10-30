@@ -1,15 +1,9 @@
 package com.example.administrator.kotlindemo.rx
 
-import java.util.HashMap
-
-import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.functions.Action1
 import rx.subscriptions.CompositeSubscription
-import rx.Subscriber
-import rx.schedulers.Schedulers
-import rx.internal.operators.OperatorReplay.observeOn
 
 
 /**

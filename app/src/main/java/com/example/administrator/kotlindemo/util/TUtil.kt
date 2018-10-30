@@ -4,8 +4,9 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
 /**
- * desc: Presenter获取
- * author：rookie on 16/12/6 下午4:55
+ * author: CuiGuo
+ * date: 2018/10/30
+ * info:presenter获取
  */
 object TUtil {
 
