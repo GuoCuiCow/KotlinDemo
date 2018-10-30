@@ -39,6 +39,6 @@ dependencies {
     //RxJava
     implementation "io.reactivex:rxkotlin:$rxkotlin_version"
     implementation "io.reactivex:rxandroid:$rxandroid_version"
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.2.60"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.2.60"
 
 }

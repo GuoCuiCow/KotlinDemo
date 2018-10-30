@@ -15,7 +15,6 @@
 app/libs/
 app/src/androidTest/
 app/src/test/
-build.gradle
 gradle.properties
 gradle/
 gradlew

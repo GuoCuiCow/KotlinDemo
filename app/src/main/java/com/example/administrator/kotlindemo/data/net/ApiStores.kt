@@ -14,7 +14,7 @@ import rx.Observable
 interface ApiStores {
     companion object {
         //baseUrl
-         val API_SERVER_URL = BuildConfig.API_URL
+        const val API_SERVER_URL = BuildConfig.API_URL
     }
 
     //加载天气

@@ -10,7 +10,9 @@ import rx.Subscriber
  * info:网络返回的回调
  */
 abstract class ApiCallback<M> : Subscriber<M>() {
-    val tag=this::class.simpleName
+    private val tag: String?
+        get() = this::class.simpleName
+
     abstract fun onSuccess(model: M)
     abstract fun onFailure(msg: String?)
     abstract fun onFinish()
@@ -25,10 +27,9 @@ abstract class ApiCallback<M> : Subscriber<M>() {
     override fun onError(e: Throwable?) {
         //这块应该可以优化
         if (e is HttpException) {
-            val httpException = e
             //httpException.response().errorBody().string()
-            val code = httpException.code()
-            var msg = httpException.message
+            val code = e.code()
+            var msg = e.message
             Log.e(tag, "code=$code")
             if (code == 504) {
                 msg = "网络不给力"
