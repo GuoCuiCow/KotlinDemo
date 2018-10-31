@@ -6,8 +6,6 @@ import com.example.administrator.kotlindemo.ui.contract.MainContract
 import rx.Observable
 
 class MainModel : MainContract.IMainModel {
-
-
     override val auth: Observable<WeatherInfoModel>
         get() = ApiClient.retrofit()
                 .loadData("101190201")

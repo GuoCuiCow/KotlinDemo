@@ -5,19 +5,14 @@ import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.v7.app.AppCompatActivity
 
-import com.example.administrator.kotlindemo.util.TUtil
-
 
 /**
  * author: CuiGuo
  * date: 2018/10/30
  * info:activity基类
  */
-abstract class BaseActivity<P : BasePresenter<*, *>, M : BaseModel?> : AppCompatActivity() {
-    val tag = javaClass.simpleName!!
-    var mPresenter: P? = null
-    var mModel: M? = null
-
+abstract class BaseActivity : AppCompatActivity() {
+    val tag = javaClass.simpleName
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         init(savedInstanceState)
@@ -25,11 +20,7 @@ abstract class BaseActivity<P : BasePresenter<*, *>, M : BaseModel?> : AppCompat
 
     /** 初始化  */
     private fun init(savedInstanceState: Bundle?) {
-
         this.setContentView(this.getLayoutId())
-        mPresenter = TUtil.getT<P>(this, 0)
-        mModel = TUtil.getT<M>(this, 1)
-        if (this is BaseView) mPresenter?.attachVM(this, mModel)
         initTitle()
         initView(savedInstanceState)
         initEvent()
@@ -73,11 +64,5 @@ abstract class BaseActivity<P : BasePresenter<*, *>, M : BaseModel?> : AppCompat
     protected fun hideLoading() {
 
     }
-
-    override fun onDestroy() {
-        mPresenter!!.detachVM()
-        super.onDestroy()
-    }
-
 
 }

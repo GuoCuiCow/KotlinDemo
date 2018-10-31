@@ -6,16 +6,17 @@ import com.example.administrator.kotlindemo.R
 import com.example.administrator.kotlindemo.base.BaseActivity
 import com.example.administrator.kotlindemo.data.entity.WeatherInfoModel
 import com.example.administrator.kotlindemo.ui.contract.MainContract
-import com.example.administrator.kotlindemo.ui.model.MainModel
 import com.example.administrator.kotlindemo.ui.presenter.MainPresenter
 
-class MainActivity : BaseActivity<MainPresenter, MainModel>(), MainContract.IMainView {
+class MainActivity : BaseActivity(), MainContract.IMainView {
+
+    private val mPresenter by lazy { MainPresenter() }
     override fun getLayoutId(): Int {
         return R.layout.activity_main
     }
 
     override fun initView(savedInstanceState: Bundle?) {
-        mPresenter!!.getWeatherInfo()
+        mPresenter.getWeatherInfo()
     }
 
 
@@ -33,5 +34,10 @@ class MainActivity : BaseActivity<MainPresenter, MainModel>(), MainContract.IMai
 
     override fun hideProgress() {
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mPresenter.detachView()
     }
 }

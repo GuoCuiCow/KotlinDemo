@@ -1,29 +1,44 @@
 package com.example.administrator.kotlindemo.base
 
-import com.example.administrator.kotlindemo.rx.RxManager
+import rx.Subscription
+import rx.subscriptions.CompositeSubscription
 
 /**
  * author: CuiGuo
  * date: 2018/10/30
  * info:
  */
-abstract class BasePresenter<M, V> {
+open class BasePresenter<T : IBaseView>  : IPresenter<T>{
 
-    var mModel: M? = null
-    var mView: V? = null
-    var mRxManager = RxManager()
+    var mRootView: T? = null
+        private set
+    private var compositeSubscription = CompositeSubscription()
 
-    fun attachVM(v: V, m: M?) {
-        this.mView = v
-        this.mModel = m
-        this.onStart()
+    override fun attachView(mRootView: T) {
+        this.mRootView = mRootView
     }
 
-    fun detachVM() {
-        mRxManager.clear()
-        mView = null
-        mModel = null
+    override fun detachView() {
+        mRootView = null
+
+        //保证activity结束时取消所有正在执行的订阅
+        compositeSubscription.unsubscribe()
+
+
     }
 
-    abstract fun onStart()
+    private val isViewAttached: Boolean
+        get() = mRootView != null
+
+    fun checkViewAttached() {
+        if (!isViewAttached) throw MvpViewNotAttachedException()
+    }
+
+    fun addSubscription(m: Subscription?) {
+        compositeSubscription.add(m)
+    }
+
+    private class MvpViewNotAttachedException internal constructor() : RuntimeException("Please call IPresenter.attachView(IBaseView) before" + " requesting data to the IPresenter")
+
+
 }
