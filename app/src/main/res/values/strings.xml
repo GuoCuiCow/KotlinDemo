@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">屁眼之滨</string>
+    <string name="app_name">PY匹配</string>
+    <string name="add">增加</string>
+    <string name="name_input_hint">请输入姓名</string>
 </resources>

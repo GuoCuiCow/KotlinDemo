@@ -1,15 +1,17 @@
 package com.example.administrator.kotlindemo.ui.activity
 
 
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
 import android.view.View
 import android.view.animation.AnimationUtils
 import com.example.administrator.kotlindemo.R
 import com.example.administrator.kotlindemo.base.BaseActivity
-import com.example.administrator.kotlindemo.data.entity.WeatherInfoModel
-import com.example.administrator.kotlindemo.ui.contract.MainContract
-import com.example.administrator.kotlindemo.ui.presenter.MainPresenter
+
 import kotlinx.android.synthetic.main.activity_main.*
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -17,31 +19,38 @@ import rx.schedulers.Schedulers
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
-class MainActivity : BaseActivity(), MainContract.IMainView {
+/**
+ * author: CuiGuo
+ * date: 2018/11/15
+ * info:抽奖页面
+ */
+class MainActivity : BaseActivity() {
     // 被抽中的卡牌
-    private val mCards = intArrayOf(R.mipmap.card_100005,R.mipmap.card_100013,R.mipmap.card_100016,R.mipmap.card_100023,R.mipmap.card_100027,R.mipmap.card_100030,R.mipmap.card_100031,R.mipmap.card_100035)
-    private val mPresenter by lazy { MainPresenter() }
+    private val mCards = intArrayOf()
     override fun getLayoutId(): Int {
         return R.layout.activity_main
     }
 
     override fun initView(savedInstanceState: Bundle?) {
-        mPresenter.getWeatherInfo()
+        verifyStoragePermissions(this)
         button.setOnClickListener {
-            fl.visibility= View.VISIBLE
-            biankuang.visibility= View.GONE
-            startCard()
+            var intent = Intent()
+            intent.setClass(this@MainActivity, RolePoolActivity::class.java)
+            startActivity(intent)
+
+//            fl.visibility= View.VISIBLE
+//            biankuang.visibility= View.GONE
+//            startCard()
         }
 
 
-    }
+    } 
 
     private fun startCard() {
         image.setImageResource(R.drawable.animcard)
         val alphaAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_card)
         image.startAnimation(alphaAnimation)
-
+        image.drawable
         val animationDrawable = image.getDrawable() as AnimationDrawable
         animationDrawable.start()
         Observable.just("Amit")
@@ -57,30 +66,28 @@ class MainActivity : BaseActivity(), MainContract.IMainView {
                 })
     }
     private fun randomCard():Int{
-        return mCards[Random().nextInt(8)]
+        return mCards[Random().nextInt(mCards.size)]
     }
 
 
+    private val REQUEST_EXTERNAL_STORAGE = 1
+    private val PERMISSIONS_STORAGE = arrayOf("android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE")
 
 
-    override fun showAuth(bean: WeatherInfoModel) {
+    private fun verifyStoragePermissions(activity: Activity) {
+
+        try {
+            //检测是否有写的权限
+            val permission = ActivityCompat.checkSelfPermission(activity,
+                    "android.permission.WRITE_EXTERNAL_STORAGE")
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有写的权限，去申请写的权限，会弹出对话框
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
     }
 
-    override fun showError(msg: String) {
-
-    }
-
-    override fun showProgress() {
-
-    }
-
-    override fun hideProgress() {
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mPresenter.detachView()
-    }
 }

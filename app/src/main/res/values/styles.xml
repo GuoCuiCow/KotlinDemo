@@ -8,4 +8,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="button_status_style">
+        <item name="android:textSize">18dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">49dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layout_marginLeft">15dp</item>
+        <item name="android:layout_marginRight">15dp</item>
+    </style>
+
 </resources>
