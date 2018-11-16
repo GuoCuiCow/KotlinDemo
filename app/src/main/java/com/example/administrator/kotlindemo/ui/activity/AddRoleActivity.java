@@ -157,8 +157,10 @@ public class AddRoleActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case PHONE_CODE_SHEAR_PACK://拍照返回
-                Uri packUri = PhoneUtils.onInitCutPhoneResult(this, requestCode, resultCode, data, "avatar_" + roleBean.id + ".jpg");
-                PhoneUtils.crop(this, packUri);
+                if (data != null) {
+                    Uri packUri = PhoneUtils.onInitCutPhoneResult(this, requestCode, resultCode, data, "avatar_" + roleBean.id + ".jpg");
+                    PhoneUtils.crop(this, packUri);
+                }
                 break;
             case PHONE_CODE__CUT://裁剪返回
                 if (data != null) {
@@ -168,8 +170,10 @@ public class AddRoleActivity extends BaseActivity {
                 }
                 break;
             case PHONE_CODE__SHEAR_MYPHONE://相册返回
-                Uri myUri = PhoneUtils.onCutmyPhoneResult(this, requestCode, resultCode, data);
-                PhoneUtils.crop(this, myUri);
+                if (data != null) {
+                    Uri myUri = PhoneUtils.onCutmyPhoneResult(this, requestCode, resultCode, data);
+                    PhoneUtils.crop(this, myUri);
+                }
                 break;
         }
 

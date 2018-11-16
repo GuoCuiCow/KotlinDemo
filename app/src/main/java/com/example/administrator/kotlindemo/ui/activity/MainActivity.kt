@@ -25,6 +25,7 @@ import com.example.administrator.kotlindemo.data.entity.RoleBean
 import com.example.administrator.kotlindemo.ui.adapter.MarryAdapter
 import com.example.administrator.kotlindemo.ui.adapter.RoleAdapter
 import com.example.administrator.kotlindemo.util.ACache
+import com.example.administrator.kotlindemo.util.PhoneUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -79,7 +80,10 @@ class MainActivity : BaseActivity() {
                 .priority(Priority.HIGH)
         verifyStoragePermissions(this)
         button.setOnClickListener {
-            marry()
+            if (roleBeans.size>0){
+                marry()
+            }
+
         }
         add.setOnClickListener {
             var intent = Intent()
@@ -144,7 +148,16 @@ class MainActivity : BaseActivity() {
                 })
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_EXTERNAL_STORAGE -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+            }else{
+                finish()
+            }
+        }
+    }
     override fun initData() {
         super.initData()
 
