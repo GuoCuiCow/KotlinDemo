@@ -6,24 +6,47 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.activity.MainActivity">
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:text="招募" />
+        android:layout_marginBottom="20dp">
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/button"
+            style="@style/button_status_style"
+            android:background="@drawable/selector_btn_1"
+            android:text="@string/marry"
+            android:textColor="#ffffff"
+            android:textStyle="bold" />
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/add"
+            style="@style/button_status_style"
+            android:background="@drawable/selector_btn_1"
+            android:text="成员"
+            android:textColor="#ffffff"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-    <FrameLayout
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_married"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/ll_content"
+        android:layout_marginBottom="20dp"/>
+
+    <RelativeLayout
         android:id="@+id/fl"
-        android:layout_width="246dp"
-        android:layout_height="374dp"
-        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
+        android:layout_centerInParent="true"
+        android:gravity="center"
         android:visibility="gone">
 
         <ImageView
@@ -35,15 +58,14 @@
             android:layout_marginRight="20dp"
             android:layout_marginTop="20dp"
             android:scaleType="fitXY"
-            android:src="@drawable/animcard"
-             />
+            android:src="@drawable/animcard" />
+
         <FrameLayout
             android:id="@+id/biankuang"
             android:layout_width="246dp"
             android:layout_height="374dp"
-
-            android:visibility="gone"/>
-    </FrameLayout>
+            android:visibility="gone" />
+    </RelativeLayout>
 
 
 </RelativeLayout>

@@ -11,22 +11,27 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.administrator.kotlindemo.R;
 import com.example.administrator.kotlindemo.base.BaseActivity;
 import com.example.administrator.kotlindemo.data.entity.RoleBean;
-import com.example.administrator.kotlindemo.util.LocalJsonResolutionUtils;
+import com.example.administrator.kotlindemo.util.ACache;
 import com.example.administrator.kotlindemo.util.PhoneUtils;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import org.jetbrains.annotations.Nullable;
@@ -45,8 +50,14 @@ import static com.example.administrator.kotlindemo.util.PhoneUtils.PHONE_CODE__S
  */
 public class AddRoleActivity extends BaseActivity {
 
-    private List<RoleBean> roleBeans = new ArrayList<>();
     private ImageView avatar;
+    private RoleBean roleBean;
+    private EditText name;
+    private List<RoleBean> roleBeans1;
+    private String avatarImg = "";
+    private ACache mCache;
+    private Gson gson;
+    private RequestOptions options;
 
     @Override
     public int getLayoutId() {
@@ -55,6 +66,14 @@ public class AddRoleActivity extends BaseActivity {
 
     @Override
     public void initView(@Nullable Bundle savedInstanceState) {
+        TextView title = findViewById(R.id.tv_title);
+        title.setText("英雄");
+        findViewById(R.id.rl_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         avatar = findViewById(R.id.iv_role);
         avatar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,18 +81,75 @@ public class AddRoleActivity extends BaseActivity {
                 showPic();
             }
         });
-        EditText name = findViewById(R.id.et_name);
+        name = findViewById(R.id.et_name);
+        Button save = findViewById(R.id.bt_add);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (check()) {
+                    roleBean.avatar = avatarImg;
+                    roleBean.name = name.getText().toString().trim();
+                    if (roleBeans1 == null) {
+                        roleBeans1 = new ArrayList<>();
+                    }
+                    String saveJson = gson.toJson(insertOrUpdate(roleBean));
+                    mCache.put("role_list", saveJson);
+                    showToast("添加成功");
+                    finish();
+                } else {
+                    showToast("请输入姓名");
+                }
+            }
+        });
+    }
+
+    //检查是否输入姓名
+    private boolean check() {
+        return !TextUtils.isEmpty(name.getText().toString().trim());
+
+    }
+
+    //修改数据
+    private List<RoleBean> insertOrUpdate(RoleBean roleBean) {
+        for (int i = 0; i < roleBeans1.size(); i++) {
+            RoleBean roleBean1 = roleBeans1.get(i);
+            if (roleBean1.id == roleBean.id) {
+                roleBeans1.remove(i);
+                break;
+            }
+        }
+        roleBeans1.add(roleBean);
+        return roleBeans1;
+
     }
 
     @Override
     protected void initData() {
         super.initData();
-        //得到本地json文本内容
-        String fileName = "roles.json";
-        String foodJson = LocalJsonResolutionUtils.getJson(this, fileName);
-//转换为对象
-        roleBeans = LocalJsonResolutionUtils.JsonToArray(foodJson, new TypeToken<List<RoleBean>>() {
+        mCache = ACache.get(this);
+        String value = mCache.getAsString("role_list");
+        roleBeans1 = new ArrayList<>();
+        gson = new Gson();
+        roleBeans1 = gson.fromJson(value, new TypeToken<List<RoleBean>>() {
         }.getType());
+        options = new RequestOptions()
+                .centerCrop()
+                .placeholder(R.drawable.vip_post_add)
+                .error(R.drawable.vip_post_add)
+                .priority(Priority.HIGH);
+        roleBean = (RoleBean) getIntent().getSerializableExtra("role");
+        if (roleBean != null) {
+            avatarImg=roleBean.avatar;
+            Glide.with(AddRoleActivity.this).load(avatarImg).apply(options).into(avatar);
+            name.setText(roleBean.name);
+        } else {
+            int roleId = 0;
+            if (roleBeans1 != null && roleBeans1.size() > 0) {
+                roleId = roleBeans1.get(roleBeans1.size() - 1).id++;
+            }
+            roleBean = new RoleBean(roleId);
+        }
+
     }
 
     @Override
@@ -81,13 +157,14 @@ public class AddRoleActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case PHONE_CODE_SHEAR_PACK://拍照返回
-                Uri packUri = PhoneUtils.onInitCutPhoneResult(this, requestCode, resultCode, data, "cut.jpg");
+                Uri packUri = PhoneUtils.onInitCutPhoneResult(this, requestCode, resultCode, data, "avatar_" + roleBean.id + ".jpg");
                 PhoneUtils.crop(this, packUri);
                 break;
             case PHONE_CODE__CUT://裁剪返回
                 if (data != null) {
+                    avatarImg = data.getData().toString();
                     Bitmap photo = data.getParcelableExtra("data");
-                    Glide.with(AddRoleActivity.this).load(photo).into(avatar);
+                    Glide.with(AddRoleActivity.this).load(photo).apply(options).into(avatar);
                 }
                 break;
             case PHONE_CODE__SHEAR_MYPHONE://相册返回
@@ -112,7 +189,7 @@ public class AddRoleActivity extends BaseActivity {
                         new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE}, CAMERA_OK);
             } else {
                 //说明已经获取到摄像头权限了
-                PhoneUtils.getSheraPack(AddRoleActivity.this, "cut.jpg");
+                PhoneUtils.getSheraPack(AddRoleActivity.this, "avatar_" + roleBean.id + ".jpg");
             }
         } else {
 //这个说明系统版本在6.0之下，不需要动态获取权限。
@@ -128,7 +205,7 @@ public class AddRoleActivity extends BaseActivity {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //takePhoto();
-                    PhoneUtils.getSheraPack(AddRoleActivity.this, "cut.jpg");
+                    PhoneUtils.getSheraPack(AddRoleActivity.this, "avatar_" + roleBean.id + ".jpg");
                 }
                 break;
         }

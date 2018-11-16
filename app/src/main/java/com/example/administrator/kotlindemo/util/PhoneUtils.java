@@ -353,15 +353,15 @@ public class PhoneUtils {
         intent.setDataAndType(uri, "image/*");
         intent.putExtra("crop", "true");
         // 裁剪框的比例，1：1
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
+        intent.putExtra("aspectX", 2);
+        intent.putExtra("aspectY", 3);
         // 裁剪后输出图片的尺寸大小
-        intent.putExtra("outputX", 250);
-        intent.putExtra("outputY", 250);
+        intent.putExtra("outputX", 200);
+        intent.putExtra("outputY", 300);
         // 图片格式
         intent.putExtra("outputFormat", "JPEG");
-        intent.putExtra("noFaceDetection", true);// 取消人脸识别
-        intent.putExtra("return-data", true);// true:不返回uri，false：返回uri
+        intent.putExtra("noFaceDetection", false);// 取消人脸识别
+        intent.putExtra("return-data", false);// true:不返回uri，false：返回uri
         activity.startActivityForResult(intent, PHONE_CODE__CUT);
     }
 

@@ -12,7 +12,7 @@
         android:layout_width="200dp"
         android:layout_height="300dp"
         android:layout_marginTop="20dp"
-        android:background="@mipmap/card_bg_1" />
+        android:background="@drawable/vip_post_add" />
 
     <EditText
         android:id="@+id/et_name"
@@ -32,6 +32,9 @@
         android:id="@+id/bt_add"
         style="@style/button_status_style"
         android:layout_marginBottom="20dp"
+        android:background="@drawable/selector_btn_1"
+        android:textStyle="bold"
+        android:textColor="#ffffff"
         android:text="@string/add" />
 
 </LinearLayout>

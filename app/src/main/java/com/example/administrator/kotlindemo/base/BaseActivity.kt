@@ -4,6 +4,7 @@ package com.example.administrator.kotlindemo.base
 import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 
 
 /**
@@ -38,7 +39,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     /** [Show Toast]  */
     fun showToast(msg: String) {
-
+        Toast.makeText(this@BaseActivity,msg,Toast.LENGTH_LONG).show()
     }
 
     /** 初始化view */

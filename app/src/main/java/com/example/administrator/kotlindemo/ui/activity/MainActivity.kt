@@ -2,15 +2,31 @@ package com.example.administrator.kotlindemo.ui.activity
 
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.animation.AnimationUtils
+import com.bumptech.glide.Glide
+import com.bumptech.glide.Priority
+import com.bumptech.glide.request.RequestOptions
 import com.example.administrator.kotlindemo.R
 import com.example.administrator.kotlindemo.base.BaseActivity
+import com.example.administrator.kotlindemo.data.entity.MarryBean
+import com.example.administrator.kotlindemo.data.entity.RoleBean
+import com.example.administrator.kotlindemo.ui.adapter.MarryAdapter
+import com.example.administrator.kotlindemo.ui.adapter.RoleAdapter
+import com.example.administrator.kotlindemo.util.ACache
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 import kotlinx.android.synthetic.main.activity_main.*
 import rx.Observable
@@ -25,28 +41,88 @@ import java.util.concurrent.TimeUnit
  * info:抽奖页面
  */
 class MainActivity : BaseActivity() {
-    // 被抽中的卡牌
-    private val mCards = intArrayOf()
+
+    private val marryBeans = ArrayList<MarryBean>()
+    val roleBeans = ArrayList<RoleBean>()
+    private var index: Int = 0
+    var sender: RoleBean? = null
+    var receiver: RoleBean? = null
+    lateinit var options: RequestOptions
     override fun getLayoutId(): Int {
         return R.layout.activity_main
     }
 
     override fun initView(savedInstanceState: Bundle?) {
+        //初始化列表
+        val mRecyclerView = findViewById<RecyclerView>(R.id.rv_married)
+//设置布局管理器
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.stackFromEnd = true
+        mRecyclerView.layoutManager = layoutManager
+//设置adapter
+        val adapter = MarryAdapter(mRecyclerView)
+        adapter.setRoles(marryBeans)
+        mRecyclerView.adapter = adapter
+//设置Item增加、移除动画
+        mRecyclerView.itemAnimator = DefaultItemAnimator()
+
+        fl.setOnClickListener {
+            fl.visibility = View.GONE
+            biankuang.visibility = View.GONE
+            rv_married.visibility = View.VISIBLE
+            adapter.notifyDataSetChanged()
+        }
+
+        options = RequestOptions()
+                .centerCrop()
+                .error(R.mipmap.error)
+                .priority(Priority.HIGH)
         verifyStoragePermissions(this)
         button.setOnClickListener {
+            marry()
+        }
+        add.setOnClickListener {
             var intent = Intent()
             intent.setClass(this@MainActivity, RolePoolActivity::class.java)
-            startActivity(intent)
-
-//            fl.visibility= View.VISIBLE
-//            biankuang.visibility= View.GONE
-//            startCard()
+            startActivityForResult(intent, 1)
         }
 
 
-    } 
+    }
 
-    private fun startCard() {
+    //点击匹配
+    private fun marry() {
+
+        if (index > roleBeans.size) {
+            showToast("已经全部匹配完毕")
+        } else {
+            index++
+            when (index) {
+                1 -> {
+                    receiver = roleBeans[index - 1]
+                    startCard(receiver!!)
+                }
+                roleBeans.size+1 -> {
+                    sender = receiver
+                    receiver = roleBeans[0]
+                    marryBeans.add(MarryBean(sender, receiver))
+                    startCard(receiver!!)
+                }
+                else -> {
+                    sender = receiver
+                    receiver = roleBeans[index - 1]
+                    marryBeans.add(MarryBean(sender, receiver))
+                    startCard(receiver!!)
+                }
+            }
+        }
+
+
+    }
+
+    private fun startCard(role: RoleBean) {
+        fl.visibility = View.VISIBLE
+        rv_married.visibility = View.GONE
         image.setImageResource(R.drawable.animcard)
         val alphaAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_card)
         image.startAnimation(alphaAnimation)
@@ -58,17 +134,45 @@ class MainActivity : BaseActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    biankuang.visibility= View.VISIBLE
+                    biankuang.visibility = View.VISIBLE
                     biankuang.setBackgroundResource(R.mipmap.card_bg_1)
-                    image.setImageResource(randomCard())
+
+                    Glide.with(this@MainActivity).load(role.avatar).apply(options).into(image)
+
                 }, {
                     finish()
                 })
     }
-    private fun randomCard():Int{
-        return mCards[Random().nextInt(mCards.size)]
+
+
+    override fun initData() {
+        super.initData()
+
+
+        val gson = Gson()
+        val mCache: ACache = ACache.get(this)
+        val value = mCache.getAsString("role_list")
+
+        val roles = gson.fromJson<List<RoleBean>>(value, object : TypeToken<List<RoleBean>>() {
+
+        }.type)
+        if (roles != null) {
+            roleBeans.clear()
+            roleBeans.addAll(roles)
+        }
+        if (roleBeans.size < 2) {
+            showToast("请添加更多活动成员")
+        }
+
+        roleBeans.shuffle()//乱序
+
+
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        initData()
+    }
 
     private val REQUEST_EXTERNAL_STORAGE = 1
     private val PERMISSIONS_STORAGE = arrayOf("android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE")
