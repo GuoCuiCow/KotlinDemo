@@ -109,7 +109,9 @@ public class RolePoolActivity extends BaseActivity {
                 finish();
             }
         });
+        for (int i = 0; i < roleBeans.size(); i++) {
 
+        }
 
     }
 

@@ -1,6 +1,7 @@
 package com.example.administrator.kotlindemo.ui.activity
 
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
@@ -43,11 +44,11 @@ import java.util.concurrent.TimeUnit
  */
 class MainActivity : BaseActivity() {
 
+    private val showMarryBeans = ArrayList<MarryBean>()
     private val marryBeans = ArrayList<MarryBean>()
     val roleBeans = ArrayList<RoleBean>()
     private var index: Int = 0
-    var sender: RoleBean? = null
-    var receiver: RoleBean? = null
+    var isSenderCard: Boolean = false
     lateinit var options: RequestOptions
     override fun getLayoutId(): Int {
         return R.layout.activity_main
@@ -62,16 +63,22 @@ class MainActivity : BaseActivity() {
         mRecyclerView.layoutManager = layoutManager
 //设置adapter
         val adapter = MarryAdapter(mRecyclerView)
-        adapter.setRoles(marryBeans)
+        adapter.setRoles(showMarryBeans)
         mRecyclerView.adapter = adapter
 //设置Item增加、移除动画
         mRecyclerView.itemAnimator = DefaultItemAnimator()
 
         fl.setOnClickListener {
-            fl.visibility = View.GONE
+            name.visibility=View.GONE
             biankuang.visibility = View.GONE
-            rv_married.visibility = View.VISIBLE
-            adapter.notifyDataSetChanged()
+            if (isSenderCard) {
+                showReceiverCard()
+            } else {
+                fl.visibility = View.GONE
+                rv_married.visibility = View.VISIBLE
+                adapter.notifyDataSetChanged()
+            }
+
         }
 
         options = RequestOptions()
@@ -80,7 +87,7 @@ class MainActivity : BaseActivity() {
                 .priority(Priority.HIGH)
         verifyStoragePermissions(this)
         button.setOnClickListener {
-            if (roleBeans.size>0){
+            if (roleBeans.size > 0) {
                 marry()
             }
 
@@ -97,33 +104,30 @@ class MainActivity : BaseActivity() {
     //点击匹配
     private fun marry() {
 
-        if (index > roleBeans.size) {
+        if (index > marryBeans.size-1) {
             showToast("已经全部匹配完毕")
         } else {
+            showMarryBeans.add(marryBeans[index])
             index++
-            when (index) {
-                1 -> {
-                    receiver = roleBeans[index - 1]
-                    startCard(receiver!!)
-                }
-                roleBeans.size+1 -> {
-                    sender = receiver
-                    receiver = roleBeans[0]
-                    marryBeans.add(MarryBean(sender, receiver))
-                    startCard(receiver!!)
-                }
-                else -> {
-                    sender = receiver
-                    receiver = roleBeans[index - 1]
-                    marryBeans.add(MarryBean(sender, receiver))
-                    startCard(receiver!!)
-                }
-            }
+            showSenderCard()
         }
 
 
     }
 
+    //展示送出者卡牌
+    private fun showSenderCard() {
+        isSenderCard = true
+        startCard(showMarryBeans.last().sender)
+    }
+
+    //展示接收者卡牌
+    private fun showReceiverCard() {
+        isSenderCard = false
+        startCard(showMarryBeans.last().receiver)
+    }
+    //开启卡牌动画
+    @SuppressLint("SetTextI18n")
     private fun startCard(role: RoleBean) {
         fl.visibility = View.VISIBLE
         rv_married.visibility = View.GONE
@@ -140,7 +144,12 @@ class MainActivity : BaseActivity() {
                 .subscribe({
                     biankuang.visibility = View.VISIBLE
                     biankuang.setBackgroundResource(R.mipmap.card_bg_1)
-
+                    name.visibility=View.VISIBLE
+                    if (isSenderCard) {
+                        name.text="送出者："+role.name
+                    }else{
+                        name.text="接收者："+role.name
+                    }
                     Glide.with(this@MainActivity).load(role.avatar).apply(options).into(image)
 
                 }, {
@@ -153,15 +162,15 @@ class MainActivity : BaseActivity() {
         when (requestCode) {
             REQUEST_EXTERNAL_STORAGE -> if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            }else{
+            } else {
                 finish()
             }
         }
     }
+
     override fun initData() {
         super.initData()
-
-
+        index = 0
         val gson = Gson()
         val mCache: ACache = ACache.get(this)
         val value = mCache.getAsString("role_list")
@@ -178,6 +187,18 @@ class MainActivity : BaseActivity() {
         }
 
         roleBeans.shuffle()//乱序
+        //生成匹配列表
+        if (roleBeans.size > 1) {
+            for (i in roleBeans.indices) {
+                if (i < roleBeans.size - 1) {
+                    marryBeans.add(MarryBean(roleBeans[i], roleBeans[i + 1]))
+                } else {
+                    marryBeans.add(MarryBean(roleBeans[i], roleBeans[0]))
+                }
+
+            }
+        }
+        marryBeans.shuffle()
 
 
     }

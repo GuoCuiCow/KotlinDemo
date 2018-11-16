@@ -47,6 +47,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
         android:gravity="center"
+        android:background="#FFFFFF"
         android:visibility="gone">
 
         <ImageView
@@ -65,6 +66,17 @@
             android:layout_width="246dp"
             android:layout_height="374dp"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="24dp"
+            android:text="123"
+            android:textColor="#333"
+            android:textSize="20dp" />
     </RelativeLayout>
 
 
